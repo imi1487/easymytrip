@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RestController;
 public class mobile {
 
     @GetMapping("/mobile")
-    public String getData() {return "i love different types o mobiles as i am fond of gadgets"; }
+    public String getData() {return "i have different types of mobiles"; }
 }
