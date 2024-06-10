@@ -24,7 +24,7 @@ pipeline {
                 script {
                     // Clean and package the Maven project
                     sh 'mvn clean package'
-                    echo 'code has been built'
+                    echo 'code has been built successfully '
                 }
             }
         }
