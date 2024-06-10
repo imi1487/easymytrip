@@ -1,4 +1,4 @@
-ackage easymytrip.example.easymytrip;
+package easymytrip.example.easymytrip;
 
 
 import org.springframework.web.bind.annotation.GetMapping;
