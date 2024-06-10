@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class railway {
 
     @GetMapping("/railway")
-    public String getData() {return "Train is free to everyone"; }
+    public String getData() {return "Train is free to only to people with less incomeq"; }
 }
 
