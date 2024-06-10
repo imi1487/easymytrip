@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Compile') {
+            steps {
+                script {
+                    // Clean and compile the Maven project
+                    sh 'mvn clean compile'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                script {
+                    // Clean and package the Maven project
+                    sh 'mvn clean package'
+                }
+            }
+        }
+    }
+}
