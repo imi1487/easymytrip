@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RestController;
 public class login {
 
     @GetMapping("/login")
-    public String getData() {return "hotels are free from today till end of this month & year"; }
+    public String getData() {return "authorised person has logged in"; }
 }
