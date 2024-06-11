@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RestController;
 public class login {
 
     @GetMapping("/login")
-    public String getData() {return "authorised person has logged  and with proper credentials"; }
+    public String getData() {return "authorised  has logged  and with proper credentials"; }
 }
