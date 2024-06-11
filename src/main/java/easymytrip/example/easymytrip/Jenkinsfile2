@@ -13,7 +13,7 @@ pipeline {
         stage('Compile') {
             steps {
                 script {
-                    // Clean and compile the Maven project
+
                     sh 'mvn clean compile'
                     echo 'code has been compiled ok'
                 }
@@ -22,8 +22,8 @@ pipeline {
         stage('Package') {
             steps {
                 script {
-                    // Clean and package the Maven project
-                    sh 'mvn clean package'
+
+                     sh 'mvn clean package'
                     echo 'code has been built'
                 }
             }
