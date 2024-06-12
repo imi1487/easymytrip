@@ -15,7 +15,7 @@ pipeline {
                 script {
 
                     sh 'mvn clean compile'
-                    echo 'code has been compiled ok'
+                    echo 'code has been compiled ok success'
                 }
             }
         }
