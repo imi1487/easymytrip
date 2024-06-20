@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "imran1487/easymytrip:dev-v1.${env.BUILD_NUMBER}"
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
+        IMAGE_NAME = "imran1487/easymytrip:dev-v1.1${env.BUILD_NUMBER}"
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.1${env.BUILD_NUMBER}"
     }
 
     options {
