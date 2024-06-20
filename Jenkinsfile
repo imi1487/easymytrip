@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "imi1487/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
         ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
-        NEXUS_IMAGE_NAME = "13.233.149.23:8085/easymytrip-ms:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
+       // NEXUS_IMAGE_NAME = "13.233.149.23:8085/easymytrip-ms:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
     }
 
     options {
@@ -25,7 +25,7 @@ pipeline {
         }
         stage('Code QA Execution') {
             steps {
-                echo 'JUnit Test Case Check in Progress!'
+                echo 'JUnit Test Case Check in Progress'
                 sh 'mvn clean test'
                 echo 'JUnit Test Case Check Completed!'
             }
