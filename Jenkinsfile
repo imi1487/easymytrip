@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "imran1487/easymytrip:dev-v1${env.BUILD_NUMBER}"
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v1${env.BUILD_NUMBER}"
+        IMAGE_NAME = "imran1487/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
+        NEXUS_IMAGE_NAME = "3.110.216.145:8085/easymytrip-ms:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
     }
 
     options {
@@ -20,6 +21,20 @@ pipeline {
                 echo 'Code Compilation is In Progress!'
                 sh 'mvn clean compile'
                 echo 'Code Compilation is Completed Successfully!'
+            }
+        }
+        stage('Sonarqube Code Quality') {
+            environment {
+                scannerHome = tool 'sonarqube-scanner'
+            }
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                    sh 'mvn sonar:sonar'
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
         stage('Code QA Execution') {
@@ -64,19 +79,32 @@ pipeline {
             steps {
                 echo "Tagging Docker Image for ECR: ${env.ECR_IMAGE_NAME}"
                 sh "docker tag ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME}"
-                echo "Docker Image Tagging Completed fine"
+                echo "Docker Image Tagging Completed"
 
                 withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
                     echo "Pushing Docker Image to ECR: ${env.ECR_IMAGE_NAME}"
                     sh "docker push ${env.ECR_IMAGE_NAME}"
-                    echo "Docker Image Push to the ECR Completed"
+                    echo "Docker Image Push to ECR Completed"
+                }
+            }
+        }
+        stage('Upload the Docker Image to Nexus') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh 'docker login http://3.110.216.145:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
+                        echo "Push Docker Image to Nexus: In Progress"
+                        sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                        sh "docker push ${env.NEXUS_IMAGE_NAME}"
+                        echo "Push Docker Image to Nexus: Completed"
+                    }
                 }
             }
         }
         stage('Delete Local Docker Images') {
             steps {
-                echo "Deleting Local Docker Images: ${env.IMAGE_NAME} and ${env.ECR_IMAGE_NAME}"
-                sh "docker rmi ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME}"
+                echo "Deleting Local Docker Images: ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                sh "docker rmi ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
                 echo "Local Docker Images Deletion Completed"
             }
         }
