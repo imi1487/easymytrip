@@ -23,3 +23,4 @@ WORKDIR /usr/local/tomcat/webapps
 
 # Start Tomcat
 CMD ["catalina.sh", "run"]
+=================================
