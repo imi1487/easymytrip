@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "imran1487/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}"
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}"
+        IMAGE_NAME = "imran1487/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${env.BUILD_NUMBER}"
     }
 
     options {
@@ -38,8 +38,8 @@ pipeline {
         }
         stage('Building & Tag Docker Image') {
             steps {
-                echo "Starting Building Docker Image: ${IMAGE_NAME}"
-                sh "docker build -t ${IMAGE_NAME} ."
+                echo "Starting Building Docker Image: ${env.IMAGE_NAME}"
+                sh "docker build -t ${env.IMAGE_NAME} ."
                 echo 'Docker Image Build Completed'
             }
         }
@@ -53,34 +53,30 @@ pipeline {
         stage('Docker Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    echo "Pushing Docker Image to DockerHub: ${IMAGE_NAME}"
+                    echo "Pushing Docker Image to DockerHub: ${env.IMAGE_NAME}"
                     sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                    sh "docker push ${IMAGE_NAME}"
+                    sh "docker push ${env.IMAGE_NAME}"
                     echo "Docker Image Push to DockerHub Completed"
                 }
             }
         }
         stage('Docker Image Push to Amazon ECR') {
             steps {
-                echo "Tagging Docker Image for ECR: ${ECR_IMAGE_NAME}"
-                sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
+                echo "Tagging Docker Image for ECR: ${env.ECR_IMAGE_NAME}"
+                sh "docker tag ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME}"
                 echo "Docker Image Tagging Completed"
 
-                withCredentials([usernamePassword(credentialsId: 'ecr:ap-south-1:ecr-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    echo "Logging in to Amazon ECR"
-                    sh """
-                    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 767398153416.dkr.ecr.ap-south-1.amazonaws.com
-                    """
-                    echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
-                    sh "docker push ${ECR_IMAGE_NAME}"
+                withDockerRegistry([credentialsId: 'ecr:ca-central-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ca-central-1.amazonaws.com"]) {
+                    echo "Pushing Docker Image to ECR: ${env.ECR_IMAGE_NAME}"
+                    sh "docker push ${env.ECR_IMAGE_NAME}"
                     echo "Docker Image Push to ECR Completed"
                 }
             }
         }
         stage('Delete Local Docker Images') {
             steps {
-                echo "Deleting Local Docker Images: ${IMAGE_NAME} and ${ECR_IMAGE_NAME}"
-                sh "docker rmi ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
+                echo "Deleting Local Docker Images: ${env.IMAGE_NAME} and ${env.ECR_IMAGE_NAME}"
+                sh "docker rmi ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME}"
                 echo "Local Docker Images Deletion Completed"
             }
         }
