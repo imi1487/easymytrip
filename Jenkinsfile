@@ -69,7 +69,7 @@ pipeline {
                 withDockerRegistry([credentialsId: 'ecr:ca-central-1:ecr-credentials', url: "https://767398063689.dkr.ecr.ca-central-1.amazonaws.com"]) {
                     echo "Pushing Docker Image to ECR: ${env.ECR_IMAGE_NAME}"
                     sh "docker push ${env.ECR_IMAGE_NAME}"
-                    echo "Docker Image Push to ECR Completed"
+                    echo "Docker Image Push to the ECR Completed"
                 }
             }
         }
