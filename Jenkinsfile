@@ -45,7 +45,7 @@ pipeline {
         }
         stage('Docker Image Scanning') {
             steps {
-                echo 'Docker Image Scanning Started'
+                echo 'Docker Image Scanning started'
                 // Add actual scanning steps here
                 echo 'Docker Image Scanning Completed'
             }
