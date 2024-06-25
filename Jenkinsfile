@@ -33,7 +33,7 @@ pipeline {
             steps {
                 echo 'Creating WAR Artifact'
                 sh 'mvn clean package'
-                echo 'WAR Artifact Creation Completed'
+                echo 'WAR Artifact Creation Complete'
             }
         }
         stage('Building & Tag Docker Image') {
@@ -77,7 +77,7 @@ pipeline {
             steps {
                 echo "Deleting Local Docker Images: ${env.IMAGE_NAME} and ${env.ECR_IMAGE_NAME}"
                 sh "docker rmi ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME}"
-                echo "Local Docker Images Deletion Complete"
+                echo "Local Docker Images Deletion Completed"
             }
         }
     }
