@@ -77,11 +77,11 @@ pipeline {
                     steps {
                         script {
                             withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                                sh 'docker login http://13.127.37.149:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
-                                echo "Push Docker Image to Nexus: In Progress"
-                                sh "docker tag ${env.IMAGE_NAME} 13.127.37.149:8085/easymytrip-ms:${env.ECR_IMAGE_NAME}"
-                                sh "docker push 13.127.37.149:8085/easymytrip-ms:${env.ECR_IMAGE_NAME}"
-                                echo "Push Docker Image to Nexus: Completed"
+                            sh 'docker login http://13.201.26.40:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
+                            echo "Push Docker Image to Nexus: In Progress"
+                            sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                            sh "docker push ${env.NEXUS_IMAGE_NAME}"
+                            echo "Push Docker Image to Nexus: Completed"
                             }
                         }
                     }
