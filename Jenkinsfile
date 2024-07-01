@@ -77,7 +77,7 @@ pipeline {
                     steps {
                         script {
                             withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                            sh 'docker login http://13.201.26.40:8081/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
+                            sh 'docker login http://15.206.169.239:8081/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
                             echo "Push Docker Image to Nexus: In Progress"
                             sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
                             sh "docker push ${env.NEXUS_IMAGE_NAME}"
