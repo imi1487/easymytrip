@@ -6,5 +6,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class mobile {
     @GetMapping("/mobile")
-    public String getData() {return  "New cell phone has been launched today now" ; }
+    public String getData() {return  "New cell phone has been launched today & tomorrow" ; }
 }
