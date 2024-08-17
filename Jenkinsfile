@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven 'maven_3.9.4'
-      }
+    }
 
     stages {
         stage('Code Compilation') {
@@ -27,12 +27,18 @@ pipeline {
                 echo 'WAR Artifact Creation Completed'
             }
         }
+        stage('Building & Tag Docker Image') {
+            steps {
+                echo "Starting Building Docker Image: ${env.IMAGE_NAME}"
+                sh "docker build -t ${env.IMAGE_NAME} ."
+                echo 'Docker Image Build Completed'
+            }
+        }
         stage('Docker Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     echo "Pushing Docker Image to DockerHub: ${env.IMAGE_NAME}"
                     sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                    sh "docker build -t ${env.IMAGE_NAME} ."
                     sh "docker push ${env.IMAGE_NAME}"
                     echo "Docker Image Push to DockerHub Completed"
                 }
@@ -40,4 +46,3 @@ pipeline {
         }
     }
 }
-
