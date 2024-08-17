@@ -5,6 +5,10 @@ pipeline {
         maven 'maven_3.9.4'
     }
 
+    environment {
+        IMAGE_NAME = 'imran1487/easymytrip:dev-v1.16' // Replace with your actual Docker Hub username and desired image tag
+    }
+
     stages {
         stage('Code Compilation') {
             steps {
