@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'imran1487/easymytrip:dev-v1.16' // Replace with your actual Docker Hub username and desired image tag
+        IMAGE_NAME = 'IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${env.BUILD_NUMBER}"' // Replace with your actual Docker Hub username and desired image tag
     }
 
     stages {
