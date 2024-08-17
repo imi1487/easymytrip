@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven 'maven_3.9.4'
-    }
+      }
 
     stages {
         stage('Code Compilation') {
@@ -16,16 +16,28 @@ pipeline {
         stage('Code QA Execution') {
             steps {
                 echo 'JUnit Test Case Check in Progress!'
-                sh 'mvn clean test'
+                sh 'mvn test'
                 echo 'JUnit Test Case Check Completed!'
             }
         }
         stage('Code Package') {
             steps {
                 echo 'Creating WAR Artifact'
-                sh 'mvn clean package'
+                sh 'mvn package'
                 echo 'WAR Artifact Creation Completed'
+            }
+        }
+        stage('Docker Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    echo "Pushing Docker Image to DockerHub: ${env.IMAGE_NAME}"
+                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    sh "docker build -t ${env.IMAGE_NAME} ."
+                    sh "docker push ${env.IMAGE_NAME}"
+                    echo "Docker Image Push to DockerHub Completed"
+                }
             }
         }
     }
 }
+
