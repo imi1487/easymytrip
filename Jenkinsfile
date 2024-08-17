@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${env.BUILD_NUMBER}"' // Replace with your actual Docker Hub username and desired image tag
+        IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}" // Correctly using BUILD_NUMBER
     }
 
     stages {
@@ -33,17 +33,17 @@ pipeline {
         }
         stage('Building & Tag Docker Image') {
             steps {
-                echo "Starting Building Docker Image: ${env.IMAGE_NAME}"
-                sh "docker build -t ${env.IMAGE_NAME} ."
+                echo "Starting Building Docker Image: ${IMAGE_NAME}"
+                sh "docker build -t ${IMAGE_NAME} ."
                 echo 'Docker Image Build Completed'
             }
         }
         stage('Docker Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    echo "Pushing Docker Image to DockerHub: ${env.IMAGE_NAME}"
+                    echo "Pushing Docker Image to DockerHub: ${IMAGE_NAME}"
                     sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                    sh "docker push ${env.IMAGE_NAME}"
+                    sh "docker push ${IMAGE_NAME}"
                     echo "Docker Image Push to DockerHub Completed"
                 }
             }
