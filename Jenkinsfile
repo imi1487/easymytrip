@@ -61,7 +61,7 @@ pipeline {
                 sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
                 echo "Docker Image Tagging Completed"
 
-                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
+                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip"]) {
                     echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
                     sh "docker push ${ECR_IMAGE_NAME}"
                     echo "Docker Image Push to ECR Completed"
