@@ -20,6 +20,21 @@ pipeline {
             }
         }
 
+        stage('SonarQube Code Quality') {
+            environment {
+                scannerHome = tool 'sonarqube-scanner'
+            }
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                    sh 'mvn sonar:sonar'
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
         stage('Code QA Execution') {
             steps {
                 echo 'JUnit Test Case Check in Progress!'
@@ -61,7 +76,7 @@ pipeline {
                 sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
                 echo "Docker Image Tagging Completed"
 
-                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip"]) {
+                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
                     echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
                     sh "docker push ${ECR_IMAGE_NAME}"
                     echo "Docker Image Push to ECR Completed"
@@ -71,22 +86,20 @@ pipeline {
 
         stage('Upload the Docker Image to Nexus') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh "docker login http://15.206.82.141:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}"
-                        echo "Push Docker Image to Nexus: In Progress"
-                        sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
-                        sh "docker push ${env.NEXUS_IMAGE_NAME}"
-                        echo "Push Docker Image to Nexus: Completed"
-                    }
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login http://15.206.82.141:8085/repository/easymytrip-ms/ -u ${USERNAME} -p ${PASSWORD}"
+                    echo "Push Docker Image to Nexus: In Progress"
+                    sh "docker tag ${IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
+                    sh "docker push ${NEXUS_IMAGE_NAME}"
+                    echo "Push Docker Image to Nexus: Completed"
                 }
             }
         }
 
         stage('Delete Local Docker Images') {
             steps {
-                echo "Deleting Local Docker Images: ${env.IMAGE_NAME}, ${env.ECR_IMAGE_NAME}, ${env.NEXUS_IMAGE_NAME}"
-                sh "docker rmi ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                echo "Deleting Local Docker Images: ${IMAGE_NAME}, ${ECR_IMAGE_NAME}, ${NEXUS_IMAGE_NAME}"
+                sh "docker rmi ${IMAGE_NAME} ${ECR_IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
                 echo "Local Docker Images Deletion Completed"
             }
         }
