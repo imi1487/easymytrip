@@ -8,6 +8,7 @@ pipeline {
     environment {
         IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
         ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+        NEXUS_IMAGE_NAME = "15.206.82.141:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -65,6 +66,28 @@ pipeline {
                     sh "docker push ${ECR_IMAGE_NAME}"
                     echo "Docker Image Push to ECR Completed"
                 }
+            }
+        }
+
+        stage('Upload the Docker Image to Nexus') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh "docker login http://15.206.82.141:8085/repository/easymytrip-ms/ -u ${USERNAME} -p ${PASSWORD}"
+                        echo "Push Docker Image to Nexus: In Progress"
+                        sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                        sh "docker push ${env.NEXUS_IMAGE_NAME}"
+                        echo "Push Docker Image to Nexus: Completed"
+                    }
+                }
+            }
+        }
+
+        stage('Delete Local Docker Images') {
+            steps {
+                echo "Deleting Local Docker Images: ${env.IMAGE_NAME}, ${env.ECR_IMAGE_NAME}, ${env.NEXUS_IMAGE_NAME}"
+                sh "docker rmi ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                echo "Local Docker Images Deletion Completed"
             }
         }
     }
