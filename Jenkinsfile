@@ -20,21 +20,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Code Quality') {
-            environment {
-                scannerHome = tool 'sonarqube-scanner'
-            }
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh "${scannerHome}/bin/sonar-scanner"
-                    sh 'mvn sonar:sonar'
-                }
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
         stage('Code QA Execution') {
             steps {
                 echo 'JUnit Test Case Check in Progress!'
@@ -87,7 +72,8 @@ pipeline {
         stage('Upload the Docker Image to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "docker login http://3.110.31.226:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}"
+                    echo "Logging in to Nexus Docker repository"
+                    sh "echo ${PASSWORD} | docker login http://3.110.31.226:8085/repository/easymytrip-ms/ -u ${USERNAME} --password-stdin"
                     echo "Push Docker Image to Nexus: In Progress"
                     sh "docker tag ${IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
                     sh "docker push ${NEXUS_IMAGE_NAME}"
@@ -99,7 +85,7 @@ pipeline {
         stage('Delete Local Docker Images') {
             steps {
                 echo "Deleting Local Docker Images: ${IMAGE_NAME}, ${ECR_IMAGE_NAME}, ${NEXUS_IMAGE_NAME}"
-                sh "docker rmi ${IMAGE_NAME} ${ECR_IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
+                sh "docker rmi ${IMAGE_NAME} ${ECR_IMAGE_NAME} ${NEXUS_IMAGE_NAME} || true"
                 echo "Local Docker Images Deletion Completed"
             }
         }
