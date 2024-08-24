@@ -70,13 +70,18 @@ pipeline {
         }
 
         stage('Upload the Docker Image to Nexus') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "docker login http://3.110.31.226:8081/repository/easymytrip-ms/ -u admin -p ${PASSWORD}"
-                    echo "Push Docker Image to Nexus: In Progress"
-                    sh "docker tag ${IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
-                    sh "docker push ${NEXUS_IMAGE_NAME}"
-                    echo "Push Docker Image to Nexus: Completed"
+                            steps {
+                                script {
+                                    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                                        sh 'docker login http://3.110.31.226:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
+                                        echo "Push Docker Image to Nexus: In Progress"
+                                        sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
+                                        sh "docker push ${env.NEXUS_IMAGE_NAME}"
+                                        echo "Push Docker Image to Nexus: Completed"
+                                    }
+                                }
+                            }
+                        }
                 }
             }
         }
