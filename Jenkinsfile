@@ -6,8 +6,9 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}" // Correctly using BUILD_NUMBER
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}" // Fixed the ECR_IMAGE_NAME
+        IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}"
+        NEXUS_IMAGE_NAME = "3.110.31.226:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -18,6 +19,7 @@ pipeline {
                 echo 'Code Compilation is Completed Successfully!'
             }
         }
+
         stage('Code QA Execution') {
             steps {
                 echo 'JUnit Test Case Check in Progress!'
@@ -25,6 +27,7 @@ pipeline {
                 echo 'JUnit Test Case Check Completed!'
             }
         }
+
         stage('Code Package') {
             steps {
                 echo 'Creating WAR Artifact'
@@ -32,6 +35,7 @@ pipeline {
                 echo 'WAR Artifact Creation Completed'
             }
         }
+
         stage('Building & Tag Docker Image') {
             steps {
                 echo "Starting Building Docker Image: ${IMAGE_NAME}"
@@ -39,6 +43,7 @@ pipeline {
                 echo 'Docker Image Build Completed'
             }
         }
+
         stage('Docker Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -49,6 +54,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Image Push to Amazon ECR') {
             steps {
                 echo "Tagging Docker Image for ECR: ${ECR_IMAGE_NAME}"
@@ -62,6 +68,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Upload the Docker Image to Nexus') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login http://3.110.31.226:8085/repository/easymytrip-ms/ -u ${USERNAME} -p ${PASSWORD}"
+                    echo "Push Docker Image to Nexus: In Progress"
+                    sh "docker tag ${IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
+                    sh "docker push ${NEXUS_IMAGE_NAME}"
+                    echo "Push Docker Image to Nexus: Completed"
+                }
+            }
+        }
+
         stage('Delete Local Docker Images') {
             steps {
                 echo "Deleting Local Docker Images: ${IMAGE_NAME} and ${ECR_IMAGE_NAME}"
