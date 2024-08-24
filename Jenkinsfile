@@ -7,8 +7,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}"
-        NEXUS_IMAGE_NAME = "3.110.31.226:8085/easymytrip-ms:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+        NEXUS_IMAGE_NAME = "3.110.31.226:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -17,6 +17,21 @@ pipeline {
                 echo 'Code Compilation is In Progress!'
                 sh 'mvn clean compile'
                 echo 'Code Compilation is Completed Successfully!'
+            }
+        }
+
+        stage('SonarQube Code Quality') {
+            environment {
+                scannerHome = tool 'sonarqube-scanner'
+            }
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                    sh 'mvn sonar:sonar'
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
 
@@ -36,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Building & Tag Docker Image') {
+        stage('Building & Tagging Docker Image') {
             steps {
                 echo "Starting Building Docker Image: ${IMAGE_NAME}"
                 sh "docker build -t ${IMAGE_NAME} ."
@@ -48,7 +63,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     echo "Pushing Docker Image to DockerHub: ${IMAGE_NAME}"
-                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     sh "docker push ${IMAGE_NAME}"
                     echo "Docker Image Push to DockerHub Completed"
                 }
@@ -70,26 +85,21 @@ pipeline {
         }
 
         stage('Upload the Docker Image to Nexus') {
-                            steps {
-                                script {
-                                    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                                        sh 'docker login http://3.110.31.226:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}'
-                                        echo "Push Docker Image to Nexus: In Progress"
-                                        sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
-                                        sh "docker push ${env.NEXUS_IMAGE_NAME}"
-                                        echo "Push Docker Image to Nexus: Completed"
-                                    }
-                                }
-                            }
-                        }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login http://3.110.31.226:8085/repository/easymytrip-ms/ -u admin -p ${PASSWORD}"
+                    echo "Push Docker Image to Nexus: In Progress"
+                    sh "docker tag ${IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
+                    sh "docker push ${NEXUS_IMAGE_NAME}"
+                    echo "Push Docker Image to Nexus: Completed"
                 }
             }
         }
 
         stage('Delete Local Docker Images') {
             steps {
-                echo "Deleting Local Docker Images: ${IMAGE_NAME} and ${ECR_IMAGE_NAME}"
-                sh "docker rmi ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
+                echo "Deleting Local Docker Images: ${IMAGE_NAME}, ${ECR_IMAGE_NAME}, ${NEXUS_IMAGE_NAME}"
+                sh "docker rmi ${IMAGE_NAME} ${ECR_IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
                 echo "Local Docker Images Deletion Completed"
             }
         }
