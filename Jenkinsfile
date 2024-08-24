@@ -8,7 +8,7 @@ pipeline {
     environment {
         IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
         ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
-        NEXUS_IMAGE_NAME = "15.206.82.141:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
+        NEXUS_IMAGE_NAME = "15.206.117.230:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -87,7 +87,7 @@ pipeline {
         stage('Upload the Docker Image to Nexus') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "docker login http://15.206.82.141:8085/repository/easymytrip-ms/ -u ${USERNAME} -p ${PASSWORD}"
+                    sh "docker login http://15.206.117.230:8085/repository/easymytrip-ms/ -u ${USERNAME} -p ${PASSWORD}"
                     echo "Push Docker Image to Nexus: In Progress"
                     sh "docker tag ${IMAGE_NAME} ${NEXUS_IMAGE_NAME}"
                     sh "docker push ${NEXUS_IMAGE_NAME}"
