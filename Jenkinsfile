@@ -48,16 +48,16 @@ pipeline {
                 }
             }
         }
-        stage('Docker Image Push to Amazon ECR') {
-            steps {
-                echo "Tagging Docker Image for ECRq: ${env.ECR_IMAGE_NAME}"
-                sh "docker tag ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME}"
-                echo "Docker Image Tagging Completed"
+         stage('Docker Image Push to Amazon ECR') {
+                    steps {
+                        echo "Tagging Docker Image for ECR: ${ECR_IMAGE_NAME}"
+                        sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
+                        echo "Docker Image Tagging Completed"
 
-                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://${ECR_URL}"]) {
-                    echo "Pushing Docker Image to ECR: ${env.ECR_IMAGE_NAME}"
-                    sh "docker push ${env.ECR_IMAGE_NAME}"
-                    echo "Docker Image Push to ECR Completed"
+                        withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
+                            echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
+                            sh "docker push ${ECR_IMAGE_NAME}"
+                            echo "Docker Image Push to ECR Completed"
                 }
             }
         }
