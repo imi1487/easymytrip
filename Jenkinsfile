@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}" // Correctly using BUILD_NUMBER
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.us-east-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}" // Fixed the ECR_IMAGE_NAME
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:dev-easymytrip-v.1.${BUILD_NUMBER}" // Fixed the ECR_IMAGE_NAME
     }
 
     stages {
@@ -55,7 +55,7 @@ pipeline {
                 sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
                 echo "Docker Image Tagging Completed"
 
-                withDockerRegistry([credentialsId: 'ecr:us-east-1:ecr-credentials', url: "https://767398153416.dkr.ecr.us-east-1.amazonaws.com"]) {
+                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
                     echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
                     sh "docker push ${ECR_IMAGE_NAME}"
                     echo "Docker Image Push to ECR Completed"
