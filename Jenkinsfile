@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-
-               IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
-               ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
-               NEXUS_IMAGE_NAME = "13.233.179.145:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
+        IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+        NEXUS_IMAGE_NAME = "13.233.179.145:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
     }
 
     options {
@@ -22,6 +21,20 @@ pipeline {
                 echo 'Code Compilation is In Progress!'
                 sh 'mvn clean compile'
                 echo 'Code Compilation is Completed Successfully!'
+            }
+        }
+        stage('Sonarqube') {
+            environment {
+                scannerHome = tool 'sonarqube-scanner'
+            }
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                    sh 'mvn sonar:sonar'
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
         stage('Code Package') {
@@ -48,16 +61,16 @@ pipeline {
                 }
             }
         }
-         stage('Docker Image Push to Amazon ECR') {
-                    steps {
-                        echo "Tagging Docker Image for ECR: ${ECR_IMAGE_NAME}"
-                        sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
-                        echo "Docker Image Tagging Completed"
+        stage('Docker Image Push to Amazon ECR') {
+            steps {
+                echo "Tagging Docker Image for ECR: ${ECR_IMAGE_NAME}"
+                sh "docker tag ${IMAGE_NAME} ${ECR_IMAGE_NAME}"
+                echo "Docker Image Tagging Completed"
 
-                        withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
-                            echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
-                            sh "docker push ${ECR_IMAGE_NAME}"
-                            echo "Docker Image Push to ECR Completed"
+                withDockerRegistry([credentialsId: 'ecr:ap-south-1:ecr-credentials', url: "https://767398153416.dkr.ecr.ap-south-1.amazonaws.com"]) {
+                    echo "Pushing Docker Image to ECR: ${ECR_IMAGE_NAME}"
+                    sh "docker push ${ECR_IMAGE_NAME}"
+                    echo "Docker Image Push to ECR Completed"
                 }
             }
         }
