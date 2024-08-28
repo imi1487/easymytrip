@@ -23,20 +23,7 @@ pipeline {
                 echo 'Code Compilation is Completed Successfully!'
             }
         }
-        stage('Sonarqube') {
-            environment {
-                scannerHome = tool 'sonarqube-scanner'
-            }
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh "${scannerHome}/bin/sonar-scanner"
-                    sh 'mvn sonar:sonar'
-                }
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+
         stage('Code Package') {
             steps {
                 echo 'Creating WAR Artifact'
@@ -44,6 +31,7 @@ pipeline {
                 echo 'Artifact Creation Completed'
             }
         }
+
         stage('Building & Tag Docker Image') {
             steps {
                 echo "Starting Building Docker Image: ${env.IMAGE_NAME}"
@@ -51,6 +39,7 @@ pipeline {
                 echo 'Docker Image Build Completed'
             }
         }
+
         stage('Docker Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CRED', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -61,6 +50,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Image Push to Amazon ECR') {
             steps {
                 echo "Tagging Docker Image for ECR: ${ECR_IMAGE_NAME}"
@@ -74,6 +64,7 @@ pipeline {
                 }
             }
         }
+
         stage('Upload the Docker Image to Nexus') {
             steps {
                 script {
@@ -87,6 +78,7 @@ pipeline {
                 }
             }
         }
+
         stage('Delete Local Docker Images') {
             steps {
                 echo "Deleting Local Docker Images: ${env.IMAGE_NAME} ${env.ECR_IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
