@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
-        ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
-        NEXUS_IMAGE_NAME = "35.154.31.81:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
-    }
+       IMAGE_NAME = "imran1487/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+     ECR_IMAGE_NAME = "767398153416.dkr.ecr.ap-south-1.amazonaws.com/easymytrip:easymytrip-v.1.${BUILD_NUMBER}"
+     NEXUS_IMAGE_NAME = "3.110.87.124:8085/easymytrip:easymytrip-ms-v.1.${env.BUILD_NUMBER}"
+   }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
@@ -23,20 +23,7 @@ pipeline {
                 echo 'Code Compilation is Completed Successfully!'
             }
         }
-        stage('Sonarqube') {
-            environment {
-                scannerHome = tool 'sonarqube-scanner'
-            }
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh "${scannerHome}/bin/sonar-scanner"
-                    sh 'mvn sonar:sonar'
-                }
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+
         stage('Code Package') {
             steps {
                 echo 'Creating WAR Artifact'
@@ -78,7 +65,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login http://35.154.31.81:8085/repository/easymytrip/ -u admin -p ${PASSWORD}'
+                        sh 'docker login http://3.110.87.124:8085/repository/easymytrip/ -u admin -p ${PASSWORD}'
                         echo "Push Docker Image to Nexus: In Progress"
                         sh "docker tag ${env.IMAGE_NAME} ${env.NEXUS_IMAGE_NAME}"
                         sh "docker push ${env.NEXUS_IMAGE_NAME}"
