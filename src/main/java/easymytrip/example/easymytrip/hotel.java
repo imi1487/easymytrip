@@ -6,5 +6,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class hotel {
     @GetMapping("/hotel")
-    public String getData() {return  "book your hotel at free " ; }
+    public String getData() {return  "book your hotel at 30 % discount " ; }
 }
