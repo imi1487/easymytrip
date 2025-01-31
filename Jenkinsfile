@@ -17,14 +17,15 @@ pipeline {
                 echo 'Code Compilation is Completed Successfully!'
             }
         }
-   stages {
-        stage('Code testing') {
+
+        stage('Code Testing') {
             steps {
-                echo 'Code testing  is In Progress!'
+                echo 'Code Testing is In Progress!'
                 sh 'mvn clean test'
-                echo 'Code Compilation is Completed Successfully!'
+                echo 'Code Testing is Completed Successfully!'
             }
         }
+
         stage('Code Package') {
             steps {
                 echo 'Creating WAR Artifact'
@@ -32,4 +33,5 @@ pipeline {
                 echo 'Artifact Creation Completed'
             }
         }
-
+    }
+}
