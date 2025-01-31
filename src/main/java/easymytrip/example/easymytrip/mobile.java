@@ -6,5 +6,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class mobile {
     @GetMapping("/mobile")
-    public String getData() {return  "i will buy i phone 220 this month " ; }
+    public String getData() {return  "i will buy i phone 210 this month " ; }
 }
