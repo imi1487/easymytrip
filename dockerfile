@@ -12,7 +12,7 @@ RUN update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java &
 # Copy the JAR file into the Tomcat webapps directory
 COPY ./target/easymytrip*.jar /usr/local/tomcat/webapps
 
-# Expose port 8080
+# Expose port 80
 EXPOSE 8080
 
 # Set the user
